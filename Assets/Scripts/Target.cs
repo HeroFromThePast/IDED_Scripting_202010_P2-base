@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
 public class Target : MonoBehaviour
 {
+
     private const float TIME_TO_DESTROY = 10F;
 
     [SerializeField]
@@ -11,8 +13,19 @@ public class Target : MonoBehaviour
     private int currentHP;
 
     [SerializeField]
-    private int scoreAdd = 10;
+    public int scoreAdd = 10;
 
+    Player player;
+
+    private void Awake()
+    {
+       player = FindObjectOfType<Player>();
+        player.OnPlayerHit += DamagePlayer;
+        player.OnScoreChanged += UpdateScore;
+
+    }
+
+    
     private void Start()
     {
         currentHP = maxHP;
@@ -31,16 +44,21 @@ public class Target : MonoBehaviour
 
             if (currentHP <= 0)
             {
-                Player player = FindObjectOfType<Player>();
+                //Player player = FindObjectOfType<Player>();
 
-                if (player != null)
-                {
-                    player.Score += scoreAdd;
-                }
+                player.OnPlayerHit -= DamagePlayer;
 
                 Destroy(gameObject);
+
+                UpdateScore();
+
+                //player.AddScore();
+
+                //player.Lives--;
+
             }
         }
+        /*
         else if (collidedObjectLayer.Equals(Utils.PlayerLayer) ||
             collidedObjectLayer.Equals(Utils.KillVolumeLayer))
         {
@@ -49,14 +67,41 @@ public class Target : MonoBehaviour
             if (player != null)
             {
                 player.Lives -= 1;
-
+                
                 if (player.Lives <= 0 && player.OnPlayerDied != null)
                 {
                     player.OnPlayerDied();
-                }
+                }              
             }
 
             Destroy(gameObject);
         }
+        */
+
+    }
+
+
+    private void UpdateScore()
+    {
+        Player player = FindObjectOfType<Player>();
+
+        player.Score += scoreAdd;
+    }
+    private void DamagePlayer()
+    {
+        Player player = FindObjectOfType<Player>();
+
+        
+
+        player.Lives--;   
+
+        if(this != null)
+        {
+            Destroy(gameObject);
+        }
+            
+                   
+            
+        
     }
 }

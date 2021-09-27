@@ -4,6 +4,8 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class Player : MonoBehaviour
 {
+    //Collider BulletCollider;
+    Target target;
     public const int PLAYER_LIVES = 3;
 
     private const float PLAYER_RADIUS = 0.4F;
@@ -65,9 +67,8 @@ public class Player : MonoBehaviour
 
     #endregion MovementProperties
 
-    public Action OnPlayerDied;
+   public Action onPlayerDied;
 
-    // Start is called before the first frame update
     private void Start()
     {
         leftCameraBound = Camera.main.ViewportToWorldPoint(new Vector3(
@@ -77,15 +78,25 @@ public class Player : MonoBehaviour
             1F, 0F, 0F)).x - PLAYER_RADIUS;
 
         Lives = PLAYER_LIVES;
+
+          
     }
+
+   
+
+
+    public Action OnPlayerHit;
+    public Action OnScoreChanged;
 
     // Update is called once per frame
     private void Update()
     {
         if (Lives <= 0)
         {
-            this.enabled = false;
-            gameObject.SetActive(false);
+            if(onPlayerDied != null)
+            {
+                onPlayerDied();
+            }
         }
         else
         {
@@ -105,5 +116,27 @@ public class Player : MonoBehaviour
                    .AddForce(transform.up * bulletSpeed, ForceMode.Impulse);
             }
         }
+
+        
     }
+
+    public void AddScore()
+    {
+        OnScoreChanged();
+    }
+
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        int collidedObjectLayer = collision.gameObject.layer;
+
+        if (collision.gameObject.CompareTag("Target"))
+        {       
+            if (OnPlayerHit != null)
+            {
+                OnPlayerHit();               
+            }
+        }
+    }
+    
 }
